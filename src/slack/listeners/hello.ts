@@ -1,6 +1,6 @@
 import { App } from '@slack/bolt';
 
-export function helloHandler(app: App): void {
+export function helloListener(app: App): void {
   app.message('hello', async ({ message, say }) => {
     console.log('message', message);
     if ('user' in message) {
