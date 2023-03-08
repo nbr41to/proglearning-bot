@@ -7,7 +7,7 @@ dotenv.config();
 const botUserId = process.env.SLACK_BOT_USER_ID ?? '';
 const askBotChannelId = process.env.SLACK_ASK_BOT_CHANNEL_ID ?? '';
 
-export function askBotListener(app: App): void {
+export function askBotHandler(app: App): void {
   app.event('app_mention', async ({ event, client, say }) => {
     const channelId = event.channel;
     if (channelId !== askBotChannelId) return;
@@ -30,7 +30,7 @@ export function askBotListener(app: App): void {
       const threadMessages = replies.messages.map((message) => {
         return {
           role: message.user === botUserId ? 'assistant' : 'user',
-          content: (message.text || '').replace(botUserId, ''),
+          content: (message.text || '').replace(`<@${botUserId}>`, ''),
         };
       });
       const gptAnswerText = await postChat(threadMessages);
