@@ -7,7 +7,7 @@ dotenv.config();
 const botUserId = process.env.SLACK_BOT_USER_ID ?? '';
 const askBotChannelId = process.env.SLACK_ASK_BOT_CHANNEL_ID ?? '';
 
-export function askBotHandler(app: App): void {
+export function askBotListener(app: App): void {
   app.event('app_mention', async ({ event, client, say }) => {
     const channelId = event.channel;
     if (channelId !== askBotChannelId) return;
