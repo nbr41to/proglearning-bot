@@ -6,12 +6,13 @@ dotenv.config();
 
 const PROGLEARNING_API_BASE_URL = process.env.PROGLEARNING_API_BASE_URL ?? '';
 const PROGLEARNING_API_KEY = process.env.PROGLEARNING_API_KEY ?? '';
+const SLACK_TEST_CHANNEL_ID = process.env.SLACK_TEST_CHANNEL_ID ?? '';
 const encodedApiKey = Buffer.from(PROGLEARNING_API_KEY).toString('base64');
 
-export function joinTeamListener(app: App): void {
-  app.event('team_join', async ({ event, client, logger }) => {
-    console.log('team_join');
-    const joinUserId = event.user.id;
+export function debugListener(app: App): void {
+  app.event('reaction_added', async ({ event, client, logger }) => {
+    if (event.item.channel !== SLACK_TEST_CHANNEL_ID) return;
+    const joinUserId = event.user;
     try {
       /* JoinしたUserのEmailを取得 */
       const result = await client.users.profile.get({
@@ -41,6 +42,7 @@ export function joinTeamListener(app: App): void {
       if (!response) throw new Error('update is failed');
     } catch (error) {
       logger.error(error);
+      console.error(error);
     }
   });
 }

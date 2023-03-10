@@ -5,6 +5,7 @@ import { indexHandler } from './handlers';
 
 import dotenv from 'dotenv';
 import { joinTeamListener } from './listeners/joinTeam';
+import { debugListener } from './listeners/debugListener';
 
 dotenv.config();
 
@@ -27,6 +28,8 @@ export const app = new App({
 helloListener(app);
 askBotListener(app);
 joinTeamListener(app);
+
+debugListener(app);
 
 /* API */
 indexHandler(router);
