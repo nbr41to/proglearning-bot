@@ -4,6 +4,7 @@ import { askBotListener } from './listeners/askBot';
 import { indexHandler } from './handlers';
 
 import dotenv from 'dotenv';
+import { joinTeamListener } from './listeners/joinTeam';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ export const app = new App({
 /* Slack listeners */
 helloListener(app);
 askBotListener(app);
+joinTeamListener(app);
 
 /* API */
 indexHandler(router);
