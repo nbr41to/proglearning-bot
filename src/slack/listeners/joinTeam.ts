@@ -1,12 +1,9 @@
 import { App } from '@slack/bolt';
 import axios from 'axios';
-import dotenv from 'dotenv';
 
-dotenv.config();
-
-const PROGLEARNING_API_BASE_URL = process.env.PROGLEARNING_API_BASE_URL ?? '';
-const PROGLEARNING_API_KEY = process.env.PROGLEARNING_API_KEY ?? '';
-const encodedApiKey = Buffer.from(PROGLEARNING_API_KEY).toString('base64');
+const encodedApiKey = Buffer.from(
+  process.env.PROGLEARNING_API_KEY ?? '',
+).toString('base64');
 
 export function joinTeamListener(app: App): void {
   app.event('team_join', async ({ event, client, logger }) => {
@@ -22,7 +19,7 @@ export function joinTeamListener(app: App): void {
 
       const joinUserEmail = result.profile.email;
       const response = await axios.patch(
-        PROGLEARNING_API_BASE_URL + '/update-slack-user-id',
+        process.env.PROGLEARNING_API_BASE_URL + '/update-slack-user-id',
         {
           slackUserId: joinUserId,
           email: joinUserEmail,

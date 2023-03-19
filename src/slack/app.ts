@@ -2,24 +2,16 @@ import { App, ExpressReceiver } from '@slack/bolt';
 import { helloListener } from './listeners/hello';
 import { askBotListener } from './listeners/askBot';
 import { indexHandler } from './handlers';
-
-import dotenv from 'dotenv';
 import { joinTeamListener } from './listeners/joinTeam';
 
-dotenv.config();
-
-/* Environments */
-const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
-const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET;
-
 const express = new ExpressReceiver({
-  signingSecret: SLACK_SIGNING_SECRET ?? '',
+  signingSecret: process.env.SLACK_SIGNING_SECRET ?? '',
 });
 const router = express.router;
 
 export const app = new App({
-  token: SLACK_BOT_TOKEN,
-  signingSecret: SLACK_SIGNING_SECRET,
+  token: process.env.SLACK_BOT_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
   receiver: express,
 });
 

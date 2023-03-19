@@ -1,8 +1,5 @@
 import { App } from '@slack/bolt';
 import axios from 'axios';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const PROGLEARNING_API_BASE_URL = process.env.PROGLEARNING_API_BASE_URL ?? '';
 const PROGLEARNING_API_KEY = process.env.PROGLEARNING_API_KEY ?? '';

@@ -1,8 +1,5 @@
 import { App } from '@slack/bolt';
 import { postChat } from '../../libs/chatGpt';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const botUserId = process.env.SLACK_BOT_USER_ID ?? '';
 const askBotChannelId = process.env.SLACK_ASK_BOT_CHANNEL_ID ?? '';
