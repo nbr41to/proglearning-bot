@@ -2,13 +2,13 @@ import {
   sendStartSessionMessage,
   updateSessionMessage,
   updateSessionMembers,
-} from '../../slack/web-client/session';
+} from 'src/slack/web-client/session';
 import {
   getLatestRoomSession,
   createRoomSession,
   deleteRoomSession,
   updateRoomSession,
-} from '../../libs/roomSession';
+} from 'src/libs/roomSession';
 import type { Client, VoiceChannel } from 'discord.js';
 import { Events } from 'discord.js';
 import dayjs from 'dayjs';

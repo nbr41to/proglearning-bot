@@ -1,8 +1,8 @@
 import {
   RoomSessionCreateInput,
   RoomSessionUpdateInput,
-} from './../types/session';
-import { RoomSession } from '../types/session';
+} from 'src/types/session';
+import { RoomSession } from 'src/types/session';
 import axios from 'axios';
 
 const baseUrl = process.env.PROGLEARNING_API_BASE_URL ?? '';

@@ -1,5 +1,5 @@
 import { App } from '@slack/bolt';
-import { postChat } from '../../libs/chatGpt';
+import { postChat } from 'src/libs/chatGpt';
 
 const botUserId = process.env.SLACK_BOT_USER_ID ?? '';
 const askBotChannelId = process.env.SLACK_ASK_BOT_CHANNEL_ID ?? '';
