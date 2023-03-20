@@ -11,7 +11,13 @@ import {
 } from 'src/libs/roomSession';
 import type { Client, VoiceChannel } from 'discord.js';
 import { Events } from 'discord.js';
-import { dayjs } from 'src/libs/dayjs';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault('Asia/Tokyo');
 
 const learningChannelId = process.env.DISCORD_LEARNING_CHANNEL_ID ?? '';
 const mutedChannelId = process.env.DISCORD_MUTED_CHANNEL_ID ?? '';
