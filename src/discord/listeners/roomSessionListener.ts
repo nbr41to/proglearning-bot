@@ -55,7 +55,7 @@ export const roomSessionListener = (client: Client): void => {
       if (!newState.member) return;
       /* 入室したらミュートになるように */
       const now = new Date();
-      const nowFormatted = dayjs().format('YYYY/MM/DD HH:mm');
+      const nowFormatted = dayjs().tz().format('YYYY/MM/DD HH:mm');
       const joinMemberId = newState.member.id;
 
       /* Slackに投稿 */
@@ -131,7 +131,11 @@ export const roomSessionListener = (client: Client): void => {
       const startedAtFormatted = startedAtUTC
         .add(9, 'hour')
         .format('YYYY/MM/DD HH:mm');
-      const finishedAtFormatted = dayjs().format('YYYY/MM/DD HH:mm');
+      console.log(
+        'dayjs(dayjs.utc(session.created_at)).tz().format("YYYY/MM/DD HH:mm")',
+        dayjs(startedAtUTC).tz().format('YYYY/MM/DD HH:mm'),
+      );
+      const finishedAtFormatted = dayjs().tz().format('YYYY/MM/DD HH:mm');
       /* 開催時間 */
       const hour = dayjs.utc().diff(startedAtUTC, 'hour');
       const minute = dayjs.utc().diff(startedAtUTC, 'minute') % 60;
