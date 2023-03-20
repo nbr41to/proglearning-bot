@@ -1,5 +1,5 @@
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import { joinLearningRoomsListeners } from './listeners/joinLearningRoomsListeners';
+import { roomsListener } from './listeners/roomsListener';
 import { autoMutedListener } from './listeners/autoMutedListener';
 
 /* Environments */
@@ -11,7 +11,7 @@ const discord = new Client({
 
 /* listeners */
 autoMutedListener(discord);
-joinLearningRoomsListeners(discord);
+roomsListener(discord);
 
 export const startDiscordApp = async () => {
   discord.once(Events.ClientReady, (client: Client<true>) => {

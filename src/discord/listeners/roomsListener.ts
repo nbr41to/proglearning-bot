@@ -2,13 +2,13 @@ import {
   sendStartSessionMessage,
   updateSessionMessage,
   updateSessionMembers,
-} from './../../slack/web-client/session';
+} from '../../slack/web-client/session';
 import {
   getLatestRoomSession,
   createRoomSession,
   deleteRoomSession,
   updateRoomSession,
-} from './../../libs/roomSession';
+} from '../../libs/roomSession';
 import type { Client, VoiceChannel } from 'discord.js';
 import { Events } from 'discord.js';
 import dayjs from 'dayjs';
@@ -16,7 +16,7 @@ import dayjs from 'dayjs';
 const learningChannelId = process.env.DISCORD_LEARNING_CHANNEL_ID ?? '';
 const mutedChannelId = process.env.DISCORD_MUTED_CHANNEL_ID ?? '';
 
-export const joinLearningRoomsListeners = (client: Client): void => {
+export const roomsListener = (client: Client): void => {
   client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
     const oldChannelId = oldState.channel?.id || null;
     const newChannelId = newState.channel?.id || null;
