@@ -13,10 +13,10 @@ axios.defaults.headers.common['Authorization'] = 'Bearer ' + encodedApiKey;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 /* 最新のSessionを取得 */
-export const getLatestPersonalSession = async () => {
+export const getLatestPersonalSession = async (discordId: string) => {
   try {
     const response = await axios.get<PersonalSession>(
-      `${baseUrl}/discord-sessions/personals`,
+      `${baseUrl}/discord-sessions/personals/${discordId}`,
     );
 
     if (response.status === 200) {

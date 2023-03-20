@@ -6,23 +6,16 @@ export const autoMutedListener = (client: Client): void => {
     async (oldState: VoiceState, newState: VoiceState) => {
       if (oldState.channel?.id === newState.channel?.id) return;
       try {
-        const mokumokuChannelId = process.env.DISCORD_MUTED_CHANNEL_ID ?? '';
-        const isJoinMokumoku = newState.channel?.id === mokumokuChannelId;
+        const mutedChannelId = process.env.DISCORD_MUTED_CHANNEL_ID ?? '';
+        const isJoinMuted = newState.channel?.id === mutedChannelId;
 
-        /* mokumokuに入ったらミュート */
-        if (!newState.mute && isJoinMokumoku) {
+        /* mutedに入ったらミュート */
+        if (!newState.mute && isJoinMuted) {
           await newState.member?.voice.setMute(true);
         }
 
-        /* mokumokuから退室でミュート解除 */
-        const isLeaveMokumoku = oldState.channel?.id === mokumokuChannelId;
-        if (isLeaveMokumoku && newState.mute && newState.channel) {
-          await oldState.member?.voice.setMute(false);
-        }
-
-        /* mokumokuじゃない部屋に入った場合にミュートを解除 */
-        if (!isJoinMokumoku && newState.mute && newState.channel) {
-          // console.log('mokumokuから出たらミュート解除');
+        /* mutedじゃない部屋に入った場合にミュートを解除 */
+        if (!isJoinMuted && newState.mute && newState.channel) {
           await newState.member?.voice.setMute(false);
         }
       } catch (error) {

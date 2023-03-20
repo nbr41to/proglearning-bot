@@ -32,10 +32,11 @@ export const personalSessionListener = (client: Client): void => {
      */
     if (isJoin && !isMove) {
       if (!newState.member) return;
-      console.log('入室 PersonalSessionの開始');
+      const memberId = newState.member.id;
+      console.info(`${memberId}の入室 PersonalSessionの開始`);
 
       await createPersonalSession({
-        discord_id: newState.member.id,
+        discord_id: memberId,
         joined_at: new Date(),
       });
     }
@@ -44,8 +45,11 @@ export const personalSessionListener = (client: Client): void => {
      * 退室
      */
     if (isLeave && !isMove) {
-      console.log('退室 PersonalSessionの終了');
-      const session = await getLatestPersonalSession();
+      if (!newState.member) return;
+      const memberId = newState.member.id;
+      console.info(`${memberId}の退室 PersonalSessionの終了`);
+
+      const session = await getLatestPersonalSession(memberId);
       if (!session) return;
 
       const totalMs =

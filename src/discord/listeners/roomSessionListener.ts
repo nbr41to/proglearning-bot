@@ -38,6 +38,7 @@ export const roomSessionListener = (client: Client): void => {
       await client.channels.fetch(learningChannelId),
       await client.channels.fetch(mutedChannelId),
     ])) as [VoiceChannel, VoiceChannel];
+
     /* 各Channelの合計人数 */
     const roomCount = learningChannel.members.size + mutedChannel.members.size;
 
@@ -47,7 +48,6 @@ export const roomSessionListener = (client: Client): void => {
     if (roomCount === 1 && isJoin && !isMove) {
       if (!newState.member) return;
       /* 入室したらミュートになるように */
-      console.log('初めての入室 通知を送る');
       const now = new Date();
       const nowFormatted = dayjs().format('YYYY/MM/DD HH:mm');
       const joinMemberId = newState.member.id;
@@ -74,7 +74,6 @@ export const roomSessionListener = (client: Client): void => {
      * 各Channelのメンバーに変更があった場合
      */
     if ((isJoin && roomCount > 1) || (isLeave && roomCount !== 0)) {
-      console.log('更新のタイミングです');
       const learningMembers = learningChannel.members;
       const mutedMembers = mutedChannel.members;
 
@@ -119,7 +118,6 @@ export const roomSessionListener = (client: Client): void => {
      * 各Channelの最後の1人が退室
      */
     if (isLeave && roomCount === 0) {
-      console.log('最後の1人が退室しました');
       const session = await getLatestRoomSession();
       if (!session) return;
 
