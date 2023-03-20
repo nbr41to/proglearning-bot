@@ -65,10 +65,11 @@ export const updateRoomSession = async (params: RoomSessionUpdateInput) => {
   }
 };
 
-export const deleteRoomSession = async (slack_timestamp: string) => {
+/* Sessionをすべて削除 */
+export const deleteRoomSessions = async () => {
   try {
     const response = await axios.delete<RoomSession>(
-      `${baseUrl}/discord-sessions/rooms/${slack_timestamp}`,
+      `${baseUrl}/discord-sessions/rooms`,
     );
 
     if (response.status === 200) {

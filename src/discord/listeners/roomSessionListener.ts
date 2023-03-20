@@ -6,17 +6,17 @@ import {
 import {
   getLatestRoomSession,
   createRoomSession,
-  deleteRoomSession,
+  deleteRoomSessions,
   updateRoomSession,
 } from 'src/libs/roomSession';
 import type { Client, VoiceChannel } from 'discord.js';
 import { Events } from 'discord.js';
-import dayjs from 'dayjs';
+import { dayjs } from 'src/libs/dayjs';
 
 const learningChannelId = process.env.DISCORD_LEARNING_CHANNEL_ID ?? '';
 const mutedChannelId = process.env.DISCORD_MUTED_CHANNEL_ID ?? '';
 
-export const roomsListener = (client: Client): void => {
+export const roomSessionListener = (client: Client): void => {
   client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
     const oldChannelId = oldState.channel?.id || null;
     const newChannelId = newState.channel?.id || null;
@@ -49,16 +49,17 @@ export const roomsListener = (client: Client): void => {
       /* 入室したらミュートになるように */
       console.log('初めての入室 通知を送る');
       const now = new Date();
-      const nowFormatted = dayjs().format('YYYY/MM/DD HH:mm:ss');
+      const nowFormatted = dayjs().format('YYYY/MM/DD HH:mm');
       const joinMemberId = newState.member.id;
 
-      const message = await sendStartSessionMessage(
-        nowFormatted,
-        newState.member.user.username,
-        isJoinLearning,
-      );
-      // const message = { ts: '1679236214.601819' };
+      /* Slackに投稿 */
+      const message = await sendStartSessionMessage({
+        startedAt: nowFormatted,
+        memberName: newState.member.user.username,
+        isLearning: isJoinLearning,
+      });
 
+      /* RoomSessionの作成 */
       await createRoomSession({
         slack_timestamp: message.ts || '',
         joined_learning_channel_member_ids: isJoinLearning
@@ -66,12 +67,6 @@ export const roomsListener = (client: Client): void => {
           : [],
         joined_muted_channel_member_ids: isJoinMuted ? [joinMemberId] : [],
         created_at: now,
-        discord_learning_personal_sessions: [
-          {
-            discord_id: joinMemberId,
-            joined_at: now,
-          },
-        ],
       });
     }
 
@@ -83,8 +78,11 @@ export const roomsListener = (client: Client): void => {
       const learningMembers = learningChannel.members;
       const mutedMembers = mutedChannel.members;
 
+      /* 最新のSessionの取得 */
       const latestSession = await getLatestRoomSession();
       if (!latestSession) return;
+
+      /* 重複を除く新しいmembers */
       const newLearningMembers = [
         ...new Set([
           ...learningMembers.map((member) => member.id),
@@ -97,17 +95,24 @@ export const roomsListener = (client: Client): void => {
           ...latestSession.joined_muted_channel_member_ids,
         ]),
       ];
-      await updateRoomSession({
-        slack_timestamp: latestSession.slack_timestamp,
-        joined_learning_channel_member_ids: newLearningMembers,
-        joined_muted_channel_member_ids: newMutedMembers,
-      });
-      await updateSessionMembers(
-        latestSession.slack_timestamp,
-        dayjs(latestSession.created_at).format('YYYY/MM/DD HH:mm:ss'),
-        learningMembers.map((member) => member.user.username),
-        mutedMembers.map((member) => member.user.username),
-      );
+
+      await Promise.all([
+        /* Session情報の更新 */
+        await updateRoomSession({
+          slack_timestamp: latestSession.slack_timestamp,
+          joined_learning_channel_member_ids: newLearningMembers,
+          joined_muted_channel_member_ids: newMutedMembers,
+        }),
+        /* Slackの投稿の更新 */
+        await updateSessionMembers({
+          ts: latestSession.slack_timestamp,
+          startedAt: dayjs(latestSession.created_at).format('YYYY/MM/DD HH:mm'),
+          learningMemberNames: learningMembers.map(
+            (member) => member.user.username,
+          ),
+          mutedMemberNames: mutedMembers.map((member) => member.user.username),
+        }),
+      ]);
     }
 
     /**
@@ -117,25 +122,35 @@ export const roomsListener = (client: Client): void => {
       console.log('最後の1人が退室しました');
       const session = await getLatestRoomSession();
       if (!session) return;
-      await deleteRoomSession(session.slack_timestamp); // TODO: あとで消す
 
-      const totalTimes = dayjs().diff(
-        dayjs(session?.created_at),
-        'minute',
-        true,
-      );
+      const startedAtUTC = dayjs.utc(session.created_at);
+      const startedAtFormatted = startedAtUTC
+        .add(9, 'hour')
+        .format('YYYY/MM/DD HH:mm');
+      const finishedAtFormatted = dayjs().format('YYYY/MM/DD HH:mm');
+      /* 開催時間 */
+      const hour = dayjs.utc().diff(startedAtUTC, 'hour');
+      const minute = dayjs.utc().diff(startedAtUTC, 'minute') % 60;
+      const second = dayjs.utc().diff(startedAtUTC, 'second') % 60;
+      const totalTimes =
+        hour > 0
+          ? `${hour}時間${minute}分${second}秒`
+          : `${minute}分${second}秒`;
 
-      await updateSessionMessage(
-        session.slack_timestamp,
-        dayjs(session?.created_at).format('YYYY/MM/DD HH:mm:ss'),
-        session.joined_learning_channel_member_ids.map(
+      await updateSessionMessage({
+        ts: session.slack_timestamp,
+        startedAt: startedAtFormatted,
+        finishedAt: finishedAtFormatted,
+        learningMemberNames: session.joined_learning_channel_member_ids.map(
           (id) => client.users.cache.get(id)?.username || '',
         ),
-        session.joined_muted_channel_member_ids.map(
+        mutedMemberNames: session.joined_muted_channel_member_ids.map(
           (id) => client.users.cache.get(id)?.username || '',
         ),
         totalTimes,
-      );
+      });
+
+      await deleteRoomSessions();
     }
   });
 };

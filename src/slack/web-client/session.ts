@@ -4,11 +4,11 @@ import { slackClient } from './client';
 const SLACK_LEARNING_CHANNEL_ID = process.env.SLACK_LEARNING_CHANNEL_ID ?? '';
 
 /* LearningSessionの開始 */
-export const sendStartSessionMessage = async (
-  startedAt: string,
-  username: string,
-  isLearning: boolean,
-): Promise<ChatPostMessageResponse> =>
+export const sendStartSessionMessage = async (params: {
+  startedAt: string;
+  memberName: string;
+  isLearning: boolean;
+}): Promise<ChatPostMessageResponse> =>
   slackClient.chat.postMessage({
     channel: SLACK_LEARNING_CHANNEL_ID,
     blocks: [
@@ -16,7 +16,7 @@ export const sendStartSessionMessage = async (
         type: 'header',
         text: {
           type: 'plain_text',
-          text: `🎉 ${startedAt} 〜`,
+          text: `🎉 ${params.startedAt} 〜`,
         },
       },
       {
@@ -30,7 +30,7 @@ export const sendStartSessionMessage = async (
         type: 'section',
         text: {
           type: 'plain_text',
-          text: isLearning ? 'learning:' : 'mkmk(muted):',
+          text: params.isLearning ? 'learning:' : 'mkmk(muted):',
         },
       },
       {
@@ -40,7 +40,7 @@ export const sendStartSessionMessage = async (
             type: 'button',
             text: {
               type: 'plain_text',
-              text: username,
+              text: params.memberName,
             },
           },
         ],
@@ -65,21 +65,21 @@ export const sendStartSessionMessage = async (
   });
 
 /* LearningSessionの更新 */
-export const updateSessionMembers = async (
-  ts: string,
-  startedAt: string,
-  learningMemberNames: string[],
-  mutedMemberNames: string[],
-): Promise<ChatPostMessageResponse> =>
+export const updateSessionMembers = async (params: {
+  ts: string;
+  startedAt: string;
+  learningMemberNames: string[];
+  mutedMemberNames: string[];
+}): Promise<ChatPostMessageResponse> =>
   slackClient.chat.update({
     channel: SLACK_LEARNING_CHANNEL_ID,
-    ts,
+    ts: params.ts,
     blocks: [
       {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: `🎉 ${startedAt} 〜`,
+          text: `🎉 ${params.startedAt} 〜`,
         },
       },
       {
@@ -99,9 +99,9 @@ export const updateSessionMembers = async (
       {
         type: 'actions',
         elements:
-          learningMemberNames.length > 0
+          params.learningMemberNames.length > 0
             ? [
-                ...learningMemberNames.map((name) => ({
+                ...params.learningMemberNames.map((name) => ({
                   type: 'button',
                   text: {
                     type: 'plain_text',
@@ -129,9 +129,9 @@ export const updateSessionMembers = async (
       {
         type: 'actions',
         elements:
-          mutedMemberNames.length > 0
+          params.mutedMemberNames.length > 0
             ? [
-                ...mutedMemberNames.map((name) => ({
+                ...params.mutedMemberNames.map((name) => ({
                   type: 'button',
                   text: {
                     type: 'plain_text',
@@ -169,22 +169,23 @@ export const updateSessionMembers = async (
   });
 
 /* LearningSessionの終了 */
-export const updateSessionMessage = async (
-  ts: string,
-  startedAt: string,
-  learningMemberNames: string[],
-  mutedMemberNames: string[],
-  totalTimes: number,
-): Promise<ChatPostMessageResponse> =>
+export const updateSessionMessage = async (params: {
+  ts: string;
+  startedAt: string;
+  finishedAt: string;
+  learningMemberNames: string[];
+  mutedMemberNames: string[];
+  totalTimes: string;
+}): Promise<ChatPostMessageResponse> =>
   slackClient.chat.update({
     channel: SLACK_LEARNING_CHANNEL_ID,
-    ts,
+    ts: params.ts,
     blocks: [
       {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: `【DONE】${totalTimes}`,
+          text: `【DONE】${params.totalTimes}`,
         },
       },
       {
@@ -192,7 +193,7 @@ export const updateSessionMessage = async (
         elements: [
           {
             type: 'mrkdwn',
-            text: `Discordの自習室は終了しました（${startedAt}〜）`,
+            text: `Discordの自習室は終了しました（${params.startedAt}〜${params.finishedAt}）`,
           },
         ],
       },
@@ -215,9 +216,9 @@ export const updateSessionMessage = async (
       {
         type: 'actions',
         elements:
-          learningMemberNames.length > 0
+          params.learningMemberNames.length > 0
             ? [
-                ...learningMemberNames.map((name) => ({
+                ...params.learningMemberNames.map((name) => ({
                   type: 'button',
                   text: {
                     type: 'plain_text',
@@ -245,9 +246,9 @@ export const updateSessionMessage = async (
       {
         type: 'actions',
         elements:
-          mutedMemberNames.length > 0
+          params.mutedMemberNames.length > 0
             ? [
-                ...mutedMemberNames.map((name) => ({
+                ...params.mutedMemberNames.map((name) => ({
                   type: 'button',
                   text: {
                     type: 'plain_text',

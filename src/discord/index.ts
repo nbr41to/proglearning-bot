@@ -1,6 +1,7 @@
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import { roomsListener } from './listeners/roomsListener';
+import { roomSessionListener } from './listeners/roomSessionListener';
 import { autoMutedListener } from './listeners/autoMutedListener';
+import { personalSessionListener } from 'src/discord/listeners/personalSessionListener';
 
 /* Environments */
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN ?? '';
@@ -11,7 +12,8 @@ const discord = new Client({
 
 /* listeners */
 autoMutedListener(discord);
-roomsListener(discord);
+roomSessionListener(discord);
+personalSessionListener(discord);
 
 export const startDiscordApp = async () => {
   discord.once(Events.ClientReady, (client: Client<true>) => {
