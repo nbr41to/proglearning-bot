@@ -6,7 +6,7 @@
   "author": "Knob <59198478+nbr41to@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "ts-node  -r tsconfig-paths/register src/index.ts",
     "dev": "nodemon --watch 'src/**/*.ts' --exec \"ts-node -r tsconfig-paths/register\" src/index.ts"
   },
   "dependencies": {
