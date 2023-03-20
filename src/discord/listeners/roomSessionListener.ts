@@ -127,19 +127,15 @@ export const roomSessionListener = (client: Client): void => {
       const session = await getLatestRoomSession();
       if (!session) return;
 
-      const startedAtUTC = dayjs.utc(session.created_at);
-      const startedAtFormatted = startedAtUTC
-        .add(9, 'hour')
+      const startedAt = session.created_at;
+      const startedAtFormatted = dayjs(startedAt)
+        .tz()
         .format('YYYY/MM/DD HH:mm');
-      console.log(
-        'dayjs(dayjs.utc(session.created_at)).tz().format("YYYY/MM/DD HH:mm")',
-        dayjs(startedAtUTC).tz().format('YYYY/MM/DD HH:mm'),
-      );
       const finishedAtFormatted = dayjs().tz().format('YYYY/MM/DD HH:mm');
       /* 開催時間 */
-      const hour = dayjs.utc().diff(startedAtUTC, 'hour');
-      const minute = dayjs.utc().diff(startedAtUTC, 'minute') % 60;
-      const second = dayjs.utc().diff(startedAtUTC, 'second') % 60;
+      const hour = dayjs().diff(startedAt, 'hour');
+      const minute = dayjs().diff(startedAt, 'minute') % 60;
+      const second = dayjs().diff(startedAt, 'second') % 60;
       const totalTimes =
         hour > 0
           ? `${hour}時間${minute}分${second}秒`
