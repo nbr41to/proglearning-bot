@@ -111,7 +111,9 @@ export const roomSessionListener = (client: Client): void => {
         /* Slackの投稿の更新 */
         await updateSessionMembers({
           ts: latestSession.slack_timestamp,
-          startedAt: dayjs(latestSession.created_at).format('YYYY/MM/DD HH:mm'),
+          startedAt: dayjs(latestSession.created_at)
+            .tz()
+            .format('YYYY/MM/DD HH:mm'),
           learningMemberNames: learningMembers.map(
             (member) => member.user.username,
           ),
