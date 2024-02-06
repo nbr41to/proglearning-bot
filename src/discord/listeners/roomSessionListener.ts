@@ -9,8 +9,8 @@ import {
   deleteRoomSessions,
   updateRoomSession,
 } from 'src/libs/roomSession';
-import type { Client, VoiceChannel } from 'discord.js';
-import { Events } from 'discord.js';
+import type {Client, VoiceChannel} from 'discord.js';
+import {Events} from 'discord.js';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -21,7 +21,9 @@ dayjs.tz.setDefault('Asia/Tokyo');
 
 const learningChannelId = process.env.DISCORD_LEARNING_CHANNEL_ID ?? '';
 const mutedChannelId = process.env.DISCORD_MUTED_CHANNEL_ID ?? '';
-
+/**
+ * Roomの状態を監視してSlackに送信する役割
+ */
 export const roomSessionListener = (client: Client): void => {
   client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
     const oldChannelId = oldState.channel?.id || null;
@@ -115,7 +117,7 @@ export const roomSessionListener = (client: Client): void => {
             .tz()
             .format('YYYY/MM/DD HH:mm'),
           learningMemberNames: learningMembers.map(
-            (member) => member.user.username,
+            (member) => member.user.username
           ),
           mutedMemberNames: mutedMembers.map((member) => member.user.username),
         }),
@@ -148,10 +150,10 @@ export const roomSessionListener = (client: Client): void => {
         startedAt: startedAtFormatted,
         finishedAt: finishedAtFormatted,
         learningMemberNames: session.joined_learning_channel_member_ids.map(
-          (id) => client.users.cache.get(id)?.username || '',
+          (id) => client.users.cache.get(id)?.username || ''
         ),
         mutedMemberNames: session.joined_muted_channel_member_ids.map(
-          (id) => client.users.cache.get(id)?.username || '',
+          (id) => client.users.cache.get(id)?.username || ''
         ),
         totalTimes,
       });
