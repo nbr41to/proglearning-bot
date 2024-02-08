@@ -4,6 +4,30 @@ import axios, {AxiosError} from 'axios';
  * PixelaのAPIを叩く
  */
 const pixelaBaseUrl = 'https://pixe.la';
+
+/* Pixelaのuserの存在チェック */
+export const checkPixelaUser = async (discordId: string) => {
+  try {
+    const response = await axios.get(`${pixelaBaseUrl}/@hyok-${discordId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-USER-TOKEN': `token:hyok-${discordId}`,
+      },
+    });
+
+    if (response.status === 200) {
+      return true;
+    }
+    if (response.status === 404) {
+      return false;
+    }
+  } catch (error) {
+    console.error((error as AxiosError).message);
+
+    throw error;
+  }
+};
+
 /* 今日のCommitを取得 */
 const getPixelaGraph = async (discordId: string) => {
   try {
@@ -99,6 +123,9 @@ const putPixelaGraph = async (
 /* 朝活の開始 */
 export const initialCommitPixelaGraph = async (discordId: string) => {
   try {
+    const isExistUser = await checkPixelaUser(discordId);
+    if (!isExistUser) return;
+
     const todayCommit = await getPixelaGraph(discordId);
     if (todayCommit) return;
 
@@ -116,6 +143,9 @@ export const initialCommitPixelaGraph = async (discordId: string) => {
 /* 朝活の達成 */
 export const completeCommitPixelaGraph = async (discordId: string) => {
   try {
+    const isExistUser = await checkPixelaUser(discordId);
+    if (!isExistUser) return;
+
     const todayCommit = await getPixelaGraph(discordId);
     if (!todayCommit) return;
     if (!todayCommit?.optionalData) return;
@@ -124,13 +154,13 @@ export const completeCommitPixelaGraph = async (discordId: string) => {
     if (optionalData.am7 === 'broke') return;
 
     // ※朝活時間が25分未満または60分以上の場合は朝活達成とみなさない
-    // const start = new Date(
-    //   `${new Date().toISOString().slice(0, 10)}T${optionalData.am7}`
-    // );
-    // const end = new Date();
-    // const diff = end.getTime() - start.getTime();
-    // const minutes = Math.floor(diff / 1000 / 60);
-    // if (60 < minutes || minutes < 25) return;
+    const start = new Date(
+      `${new Date().toISOString().slice(0, 10)}T${optionalData.am7}`
+    );
+    const end = new Date();
+    const diff = end.getTime() - start.getTime();
+    const minutes = Math.floor(diff / 1000 / 60);
+    if (60 < minutes || minutes < 25) return;
 
     // 朝活の達成
     const quantity = Number(todayCommit.quantity) + 2;
@@ -147,6 +177,9 @@ export const completeCommitPixelaGraph = async (discordId: string) => {
 /* 朝活後の休憩室に参加 */
 export const brokeCommitPixelaGraph = async (discordId: string) => {
   try {
+    const isExistUser = await checkPixelaUser(discordId);
+    if (!isExistUser) return;
+
     const todayCommit = await getPixelaGraph(discordId);
     if (!todayCommit) return;
     if (!todayCommit?.optionalData) return;
