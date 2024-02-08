@@ -1,6 +1,6 @@
-import type { Client } from 'discord.js';
+import type {Client} from 'discord.js';
 
-import { Events } from 'discord.js';
+import {Events} from 'discord.js';
 import {
   createPersonalSession,
   getLatestPersonalSession,
@@ -10,6 +10,9 @@ import {
 const learningChannelId = process.env.DISCORD_LEARNING_CHANNEL_ID ?? '';
 const mutedChannelId = process.env.DISCORD_MUTED_CHANNEL_ID ?? '';
 
+/**
+ * 個人のSessionの状態を監視してDBに保存する役割
+ */
 export const personalSessionListener = (client: Client): void => {
   client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
     const oldChannelId = oldState.channel?.id || null;

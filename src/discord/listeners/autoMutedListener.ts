@@ -1,13 +1,16 @@
-import { Client, Events, VoiceState } from 'discord.js';
+import {Client, Events, VoiceState} from 'discord.js';
 
-export const autoMutedListener = (client: Client): void => {
+export const autoMutedListener = (
+  client: Client,
+  mutedChannelIds: string[]
+): void => {
   client.on(
     Events.VoiceStateUpdate,
     async (oldState: VoiceState, newState: VoiceState) => {
       if (oldState.channel?.id === newState.channel?.id) return;
       try {
-        const mutedChannelId = process.env.DISCORD_MUTED_CHANNEL_ID ?? '';
-        const isJoinMuted = newState.channel?.id === mutedChannelId;
+        const isJoinMuted =
+          newState.channel?.id && mutedChannelIds.includes(newState.channel.id);
 
         /* mutedに入ったらミュート */
         if (!newState.mute && isJoinMuted) {
@@ -21,6 +24,6 @@ export const autoMutedListener = (client: Client): void => {
       } catch (error) {
         console.error(error);
       }
-    },
+    }
   );
 };
