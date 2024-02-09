@@ -123,9 +123,6 @@ const putPixelaGraph = async (
 /* 朝活の開始 */
 export const initialCommitPixelaGraph = async (discordId: string) => {
   try {
-    const isExistUser = await checkPixelaUser(discordId);
-    if (!isExistUser) return;
-
     const todayCommit = await getPixelaGraph(discordId);
     if (todayCommit) return;
 
@@ -143,9 +140,6 @@ export const initialCommitPixelaGraph = async (discordId: string) => {
 /* 朝活の達成 */
 export const completeCommitPixelaGraph = async (discordId: string) => {
   try {
-    const isExistUser = await checkPixelaUser(discordId);
-    if (!isExistUser) return;
-
     const todayCommit = await getPixelaGraph(discordId);
     if (!todayCommit) return;
     if (!todayCommit?.optionalData) return;
@@ -177,9 +171,6 @@ export const completeCommitPixelaGraph = async (discordId: string) => {
 /* 朝活後の休憩室に参加 */
 export const brokeCommitPixelaGraph = async (discordId: string) => {
   try {
-    const isExistUser = await checkPixelaUser(discordId);
-    if (!isExistUser) return;
-
     const todayCommit = await getPixelaGraph(discordId);
     if (!todayCommit) return;
     if (!todayCommit?.optionalData) return;
