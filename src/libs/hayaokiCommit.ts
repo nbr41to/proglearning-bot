@@ -5,29 +5,6 @@ import axios, {AxiosError} from 'axios';
  */
 const pixelaBaseUrl = 'https://pixe.la';
 
-/* Pixelaのuserの存在チェック */
-export const checkPixelaUser = async (discordId: string) => {
-  try {
-    const response = await axios.get(`${pixelaBaseUrl}/@hyok-${discordId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-USER-TOKEN': `token:hyok-${discordId}`,
-      },
-    });
-
-    if (response.status === 200) {
-      return true;
-    }
-    if (response.status === 404) {
-      return false;
-    }
-  } catch (error) {
-    console.error((error as AxiosError).message);
-
-    throw error;
-  }
-};
-
 /* 今日のCommitを取得 */
 const getPixelaGraph = async (discordId: string) => {
   try {
@@ -45,12 +22,10 @@ const getPixelaGraph = async (discordId: string) => {
     if (response.status === 200) {
       return response.data;
     }
-    if (response.status === 404) {
-      return null;
-    }
   } catch (error) {
-    console.error((error as AxiosError).message);
+    if ((error as AxiosError).response?.status === 404) return null;
 
+    console.error((error as AxiosError).message);
     throw error;
   }
 };
@@ -124,6 +99,7 @@ const putPixelaGraph = async (
 export const initialCommitPixelaGraph = async (discordId: string) => {
   try {
     const todayCommit = await getPixelaGraph(discordId);
+    console.log('todayCommit', todayCommit);
     if (todayCommit) return;
 
     const HHmm = new Date().toISOString().slice(11, 16);

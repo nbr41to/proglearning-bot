@@ -17,7 +17,7 @@ const discord = new Client({
 autoMutedListener(discord, [mutedChannelId1, mutedChannelId2]);
 roomSessionListener(discord);
 personalSessionListener(discord);
-// hayaokiSessionListener(discord);
+hayaokiSessionListener(discord);
 
 export const startDiscordApp = async () => {
   discord.once(Events.ClientReady, (client: Client<true>) => {
