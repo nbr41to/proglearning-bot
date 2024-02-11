@@ -19,14 +19,12 @@ const getPixelaGraph = async (discordId: string) => {
       }
     );
 
-    if (response.status === 200) {
-      return response.data;
-    }
+    return response;
   } catch (error) {
-    if ((error as AxiosError).response?.status === 404) return null;
-
-    console.error((error as AxiosError).message);
-    throw error;
+    if ((error as AxiosError).response?.status === 503) {
+      console.log('503エラーが発生しました');
+    }
+    return (error as AxiosError).response;
   }
 };
 
@@ -53,13 +51,12 @@ const postPixelaGraph = async (
       }
     );
 
-    if (response.status === 200) {
-      return response.data;
-    }
+    return response;
   } catch (error) {
-    console.error((error as AxiosError).message);
-
-    throw error;
+    if ((error as AxiosError).response?.status === 503) {
+      console.log('503エラーが発生しました');
+    }
+    return (error as AxiosError).response;
   }
 };
 
@@ -85,29 +82,44 @@ const putPixelaGraph = async (
       }
     );
 
-    if (response.status === 200) {
-      return response.data;
-    }
+    return response;
   } catch (error) {
-    console.error((error as AxiosError).message);
-
-    throw error;
+    if ((error as AxiosError).response?.status === 503) {
+      console.log('503エラーが発生しました');
+    }
+    return (error as AxiosError).response;
   }
 };
 
 /* 朝活の開始 */
 export const initialCommitPixelaGraph = async (discordId: string) => {
   try {
-    const todayCommit = await getPixelaGraph(discordId);
-    console.log('todayCommit', todayCommit);
-    if (todayCommit) return;
+    let getResponse;
+    do {
+      getResponse = await getPixelaGraph(discordId);
+      console.log(
+        'initialCommitPixelaGraph.getPixelaGraph',
+        getResponse?.status
+      );
+    } while (getResponse?.status === 503); // 25%の確率で503エラーが発生する
+
+    if (getResponse?.status === 400) return; // 未登録
+    if (getResponse?.status === 404) return; // 既存のデータがない
 
     const HHmm = new Date().toISOString().slice(11, 16);
     const optionalData = {
       am7: HHmm,
     };
     const json = JSON.stringify(optionalData);
-    await postPixelaGraph(discordId, 1, json);
+
+    let postResponse;
+    do {
+      postResponse = await postPixelaGraph(discordId, 1, json);
+      console.log(
+        'initialCommitPixelaGraph.postPixelaGraph',
+        postResponse?.status
+      );
+    } while (postResponse?.status === 503); // 25%の確率で503エラーが発生する
   } catch (error) {
     console.error((error as AxiosError).message);
   }
@@ -116,10 +128,20 @@ export const initialCommitPixelaGraph = async (discordId: string) => {
 /* 朝活の達成 */
 export const completeCommitPixelaGraph = async (discordId: string) => {
   try {
-    const todayCommit = await getPixelaGraph(discordId);
-    if (!todayCommit) return;
-    if (!todayCommit?.optionalData) return;
-    const optionalData = JSON.parse(todayCommit.optionalData);
+    let getResponse;
+    do {
+      getResponse = await getPixelaGraph(discordId);
+      console.log(
+        'completeCommitPixelaGraph.getPixelaGraph',
+        getResponse?.status
+      );
+    } while (getResponse?.status === 503); // 25%の確率で503エラーが発生する
+
+    if (getResponse?.status === 400) return; // 未登録
+    if (getResponse?.status === 404) return; // 既存のデータがない
+    if (!getResponse?.data?.optionalData) return;
+
+    const optionalData = JSON.parse(getResponse.data.optionalData);
     if (optionalData.am7 === 'completed') return;
     if (optionalData.am7 === 'broke') return;
 
@@ -133,12 +155,20 @@ export const completeCommitPixelaGraph = async (discordId: string) => {
     if (60 < minutes || minutes < 25) return;
 
     // 朝活の達成
-    const quantity = Number(todayCommit.quantity) + 2;
+    const quantity = Number(getResponse.data.quantity) + 2;
     const newOptionalData = {
       am7: 'completed',
     };
     const json = JSON.stringify(newOptionalData);
-    await putPixelaGraph(discordId, quantity, json);
+
+    let putResponse;
+    do {
+      putResponse = await putPixelaGraph(discordId, quantity, json);
+      console.log(
+        'completeCommitPixelaGraph.postPixelaGraph',
+        putResponse?.status
+      );
+    } while (putResponse?.status === 503); // 25%の確率で503エラーが発生する
   } catch (error) {
     console.error((error as AxiosError).message);
   }
@@ -147,18 +177,28 @@ export const completeCommitPixelaGraph = async (discordId: string) => {
 /* 朝活後の休憩室に参加 */
 export const brokeCommitPixelaGraph = async (discordId: string) => {
   try {
-    const todayCommit = await getPixelaGraph(discordId);
-    if (!todayCommit) return;
-    if (!todayCommit?.optionalData) return;
-    const optionalData = JSON.parse(todayCommit.optionalData);
+    let getResponse;
+    do {
+      getResponse = await getPixelaGraph(discordId);
+    } while (getResponse?.status === 503); // 25%の確率で503エラーが発生する
+
+    if (getResponse?.status === 400) return; // 未登録
+    if (getResponse?.status === 404) return; // 既存のデータがない
+    if (!getResponse?.data?.optionalData) return;
+
+    const optionalData = JSON.parse(getResponse.data.optionalData);
     if (optionalData.am7 !== 'completed') return;
 
-    const quantity = Number(todayCommit.quantity) + 2;
+    const quantity = Number(getResponse.data.quantity) + 2;
     const newOptionalData = {
       am7: 'broke',
     };
     const json = JSON.stringify(newOptionalData);
-    await putPixelaGraph(discordId, quantity, json);
+
+    let putResponse;
+    do {
+      putResponse = await putPixelaGraph(discordId, quantity, json);
+    } while (putResponse?.status === 503); // 25%の確率で503エラーが発生する
   } catch (error) {
     console.error((error as AxiosError).message);
   }
