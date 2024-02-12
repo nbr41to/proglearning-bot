@@ -104,7 +104,6 @@ export const initialCommitPixelaGraph = async (discordId: string) => {
     } while (getResponse?.status === 503); // 25%の確率で503エラーが発生する
 
     if (getResponse?.status === 400) return; // 未登録
-    if (getResponse?.status === 404) return; // 既存のデータがない
 
     const HHmm = new Date().toISOString().slice(11, 16);
     const optionalData = {
